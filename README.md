@@ -15,8 +15,8 @@ The files themselves live on GitHub Pages, so they are online while your Pages s
 ## Set it up
 
 1. On [github.com/ipni/gitpin-template](https://github.com/ipni/gitpin-template) click "Use this template" > "Create a new repository". Name it exactly `<your-username>.github.io` (lowercase is fine) and make it **Public**. Pages on free accounts needs a public repo. An account can have only one such repo. If you already use yours for a website, adding gitpin to it would replace that website, so use a custom domain instead (see [Use a custom domain](https://github.com/ipni/gitpin#use-a-custom-domain)) or create the repo under a GitHub organization you own.
-2. Open the [keygen page](https://ipni.github.io/gitpin/keygen/), click "Make a key", copy the key.
-3. In the new repo: Settings > Secrets and variables > Actions > New repository secret, name `GITPIN_KEY`, paste, Add secret.
+2. Make a key. In a terminal run `ssh-keygen -t ed25519 -N '' -C gitpin -f gitpin-key`. It writes `gitpin-key` (the private key) and `gitpin-key.pub` in the current folder. Make a new key just for gitpin; never use your own SSH login key, because the secret can be read by any workflow in the repo.
+3. Add the secret. Either run `gh secret set GITPIN_KEY --repo <your-username>/<your-username>.github.io < gitpin-key` with the GitHub CLI, or open Settings > Secrets and variables > Actions > New repository secret, name it `GITPIN_KEY`, paste the whole contents of `gitpin-key` including the BEGIN and END lines, and click Add secret. Then delete both files with `rm gitpin-key gitpin-key.pub` (the secret is the only copy you need). In Windows PowerShell, write the empty passphrase as `-N '""'`, add the secret by pasting it in Settings (PowerShell has no `<` redirect), and delete the files with `del gitpin-key, gitpin-key.pub`.
 4. Actions tab > "gitpin" workflow > "Run workflow" (or edit any file in `pins/` and commit). The first run creates the `gh-pages` branch, then waits up to 10 minutes for Pages and fails with a message ending in "is not serving the new head yet", because Pages is not serving the branch yet. That is expected.
 5. Settings > Pages > Build and deployment > Source "Deploy from a branch", Branch `gh-pages`, folder `/ (root)`, Save. GitHub usually has Pages on already for a repo named `<your-username>.github.io`, serving `main`; the change is only the branch. Saving does not publish anything by itself; the re-run in the next step does.
 6. Re-run the workflow. When it is green, the run summary lists each pin with its CID and links; `https://<your-username>.github.io` shows the same list.
@@ -49,7 +49,7 @@ Delete the file or folder from `pins/` and commit. The blocks are removed from t
 - Your pins are public. Anyone can fetch them, and the CIDs and your peer ID are listed on cid.contact. Do not publish secrets or personal data.
 - This is not durable storage. Your files are online while your GitHub Pages site is. Delete the repo or turn off Pages and they are gone (other IPFS nodes may still hold copies they fetched). To keep a copy elsewhere with the same CID, add the CID to a pinning service or run `ipfs pin add <cid>` on your own Kubo node.
 - At most 500 MiB and 50,000 blocks of content per repo.
-- The key signs your advertisements. Keep it only in the `GITPIN_KEY` secret. If it leaks, make a new key, replace the secret, and delete `gitpin.json` and the `ipni/` folder from the `gh-pages` branch before the next run; `ipfs/` can stay. On GitHub: open the `gh-pages` branch, open `gitpin.json`, "..." > "Delete file", commit; open the `ipni` folder, "..." > "Delete directory", commit; or do the same in a local clone and push.
+- The key signs your advertisements. Keep it only in the `GITPIN_KEY` secret. If it leaks, make a new key with the `ssh-keygen` command in step 2, replace the secret, and delete `gitpin.json` and the `ipni/` folder from the `gh-pages` branch before the next run; `ipfs/` can stay. On GitHub: open the `gh-pages` branch, open `gitpin.json`, "..." > "Delete file", commit; open the `ipni` folder, "..." > "Delete directory", commit; or do the same in a local clone and push.
 
 ## If something goes wrong
 
@@ -57,6 +57,8 @@ Delete the file or folder from `pins/` and commit. The blocks are removed from t
 - **"... redirects to ..."**: the site redirects, usually because a custom domain is set while `base-url` is still the default `https://<owner>.github.io`, or the domain was given as the apex while Pages serves `www` (or the other way round); set `base-url` to the exact origin that serves the site.
 - **"The GITPIN_KEY secret is not set"**: add the secret under Settings > Secrets and variables > Actions.
 - **"GITPIN_KEY belongs to ... but gitpin.json was written by ..."**: the key changed; see the key bullet above.
+- **"GITPIN_KEY is not an Ed25519 key"**: the secret holds something else, often the `.pub` file or a cut-off paste; paste the whole private key file again, or make a new key.
+- **"GITPIN_KEY has a passphrase"**: make a new key with `-N ''`.
 - **"needs a repo named `<owner>.github.io`"**: rename the repo, or use a custom domain (see the [main README](https://github.com/ipni/gitpin#readme)).
 - **A yellow "cid.contact has not indexed every pin yet" warning**: wait a few minutes and re-run the workflow.
 - **The push to `gh-pages` fails**: the workflow's `actions/checkout` must keep its default credentials; `persist-credentials: false` breaks the push that the `ipni/gitpin@v1` action makes.
