@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  pages: read
 concurrency:
   group: gitpin
   cancel-in-progress: false

@@ -17,9 +17,9 @@ This is a good way to get started with IPFS, but on its own it is not resilient.
 1. On [github.com/ipni/gitpin-template](https://github.com/ipni/gitpin-template) click "Use this template" > "Create a new repository". Name it exactly `<your-username>.github.io` (lowercase is fine) and make it **Public**. Pages on free accounts needs a public repo. An account can have only one such repo. If you already use yours for a website, adding gitpin to it would replace that website, so use a custom domain instead (see [Use a custom domain](https://github.com/ipni/gitpin#use-a-custom-domain)) or create the repo under a GitHub organization you own.
 2. Make a key. In a terminal, run `ssh-keygen -t ed25519 -C gitpin -f gitpin-key` and press Enter twice when it asks for a passphrase (gitpin needs a key without one). It makes two files in the current folder: `gitpin-key` (the private key) and `gitpin-key.pub`. Make a new key just for gitpin, never reuse your own SSH login key: any workflow in the repo can read the secret.
 3. Add the secret. Open `gitpin-key` in a text editor and copy all of it, including the `BEGIN` and `END` lines. In the new repo: Settings > Secrets and variables > Actions > New repository secret, name `GITPIN_KEY`, paste, Add secret. Then delete both key files; the secret is the only copy you need.
-4. Actions tab > "gitpin" workflow > "Run workflow" (or edit any file in `pins/` and commit). The first run creates the `gh-pages` branch, then waits up to 10 minutes for Pages and fails with a message ending in "is not serving the new head yet", because Pages is not serving the branch yet. That is expected.
-5. Settings > Pages > Build and deployment > Source "Deploy from a branch", Branch `gh-pages`, folder `/ (root)`, Save. GitHub usually has Pages on already for a repo named `<your-username>.github.io`, serving `main`; the change is only the branch. Saving does not publish anything by itself; the re-run in the next step does.
-6. Re-run the workflow. When it is green, the run summary lists each pin with its CID and links; `https://<your-username>.github.io` shows the same list.
+4. Create the `gh-pages` branch: on the repo's main page, open the branch menu (it shows `main`), type `gh-pages`, and click the option to create the branch from `main`. gitpin replaces its contents on the first run.
+5. Settings > Pages > Build and deployment > Source "Deploy from a branch", Branch `gh-pages`, folder `/ (root)`, Save. GitHub usually has Pages on already for a repo named `<your-username>.github.io`, serving `main`; the change is only the branch.
+6. Actions tab > "gitpin" workflow > "Run workflow" (or edit any file in `pins/` and commit). When it is green, the run summary lists each pin with its CID and links; `https://<your-username>.github.io` shows the same list. The first run takes a few minutes longer while Pages deploys.
 
 The template ships `pins/hello.txt` containing `Hello from my first IPFS pin!`; that is your first pin.
 
@@ -54,6 +54,7 @@ Delete the file or folder from `pins/` and commit. The blocks are removed from t
 ## If something goes wrong
 
 - **"... is not serving the new head yet"**: Pages is off, the source is not set to the `gh-pages` branch, the repo is private, the repo is not named `<owner>.github.io` and no `base-url` is set, or a custom domain is not pointing at Pages yet.
+- **"GitHub Pages serves ... but gitpin pushed to ..."**: Pages points at another branch or folder, or deploys from GitHub Actions; set Settings > Pages to "Deploy from a branch", `gh-pages`, `/ (root)`, and re-run the workflow.
 - **"... redirects to ..."**: the site redirects, usually because a custom domain is set while `base-url` is still the default `https://<owner>.github.io`, or the domain was given as the apex while Pages serves `www` (or the other way round); set `base-url` to the exact origin that serves the site.
 - **"The GITPIN_KEY secret is not set"**: add the secret under Settings > Secrets and variables > Actions.
 - **"GITPIN_KEY belongs to ... but gitpin.json was written by ..."**: the key changed; see the key bullet above.
