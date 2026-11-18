@@ -10,7 +10,7 @@ If you only want a website, plain GitHub Pages is the better choice and this tem
 
 Put a file in the `pins/` folder, commit, and the [gitpin](https://github.com/ipni/gitpin#readme) action publishes it to [IPFS](https://ipfs.tech/). IPFS is a network where files are found by their name (their CID) instead of by an address. Every file or folder you put in `pins/` gets its own CID, and anyone with that CID can fetch exactly those bytes from the network and verify they match.
 
-The files themselves live on GitHub Pages, so they are online while your Pages site is. To keep a copy elsewhere, add the CID to a pinning service (a paid or free service that keeps copies of files by CID) or to your own IPFS node; the same CID keeps working.
+This is a good way to get started with IPFS, but on its own it is not resilient. The files live only on GitHub Pages, so a GitHub outage, a deleted repo or a takedown makes them unreachable. To make them resistant to outages and censorship, also pin the CID on other nodes: your own IPFS node, a friend's, or a pinning service (a service that keeps copies of files by CID). Every copy serves the same CID, so your links keep working.
 
 ## Set it up
 
@@ -47,7 +47,7 @@ Delete the file or folder from `pins/` and commit. The blocks are removed from t
 ## Good to know
 
 - Your pins are public. Anyone can fetch them, and the CIDs and your peer ID are listed on cid.contact. Do not publish secrets or personal data.
-- This is not durable storage. Your files are online while your GitHub Pages site is. Delete the repo or turn off Pages and they are gone (other IPFS nodes may still hold copies they fetched). To keep a copy elsewhere with the same CID, add the CID to a pinning service or run `ipfs pin add <cid>` on your own Kubo node.
+- This is not durable storage and not censorship resistant on its own: GitHub is the only host. Your files are online while your GitHub Pages site is. Delete the repo or turn off Pages and they are gone (other IPFS nodes may still hold copies they fetched). To keep a copy elsewhere with the same CID, add the CID to a pinning service or run `ipfs pin add <cid>` on your own Kubo node.
 - At most 500 MiB and 50,000 blocks of content per repo.
 - The key signs your advertisements. Keep it only in the `GITPIN_KEY` secret. If it leaks, make a new key with the `ssh-keygen` command in step 2, replace the secret, and delete `gitpin.json` and the `ipni/` folder from the `gh-pages` branch before the next run; `ipfs/` can stay. On GitHub: open the `gh-pages` branch, open `gitpin.json`, "..." > "Delete file", commit; open the `ipni` folder, "..." > "Delete directory", commit; or do the same in a local clone and push.
 
